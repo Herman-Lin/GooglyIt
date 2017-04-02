@@ -4,6 +4,7 @@ import com.microsoft.projectoxford.face.*;
 import com.microsoft.projectoxford.face.contract.*;
 
 public class Global {
+        public static int mode = 0; // 0 = main, 1 = Googly; 2 = Swap
         public static Face[] all;
         public static boolean firstCall = true;
         public static int time;
