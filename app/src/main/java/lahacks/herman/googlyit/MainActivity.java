@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void onSensorChanged(SensorEvent event) {
         if (Global.all != null && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-           if (event.values[0] > 0.123) { // to right
+           if (event.values[0] > 0.128) { // to right
                Global.time = 1;
                if (Global.r > 0){
                    Global.rv -= event.values[0] *800;
@@ -126,12 +126,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                //else if (Global.r < 90 && Global.r > -90)
                 //  Global.rv = event.values[0] * -1000;
            }
-           else if (event.values[0] < -0.123) { // to left
+           else if (event.values[0] < -0.128) { // to left
                Global.time = 1;
                if (Global.r > 0){
-                   Global.rv += event.values[0] *1000;
+                   Global.rv += event.values[0] * 700;
                }
-               else Global.rv -= event.values[0] *1000;
+               else Global.rv -= event.values[0] * 700;
 
                //if (Global.d == -1 && (Global.r > 90 || Global.r < -90))
                  //  Global.rv = event.values[0] * 1000;
@@ -275,33 +275,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                    Global.rv = 0;
                     Global.r = 0;
                 }
-                if (Global.r > 180) Global.r = -180;
+                if (Global.r >= 180) Global.r = -180;
                 else if (Global.r < -180) Global.r = 180;
-                Global.r = Math.pow(2.71828, -0.000125 * Global.time) * (Global.r + Global.rv / 60);
-                canvas.drawBitmap(bitmap,0,0,paint);
+                Global.r = Math.pow(2.71828, -0.0002 * Global.time) * (Global.r + Global.rv / 60);
+
                 if (Global.firstCall) {
                     m_bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    a = m_bitmap.getWidth();
+                    b = m_bitmap.getHeight();
+
+                    if (a / b >= 1){
+                        scale = (w - 1) / m_bitmap.getWidth();
+                        if (m_bitmap.getHeight() * scale > h - 300) {
+                            scale = (h - 300) / m_bitmap.getHeight();
+                        }
+                    }
+                    else {
+                        scale = (h - 300) / m_bitmap.getHeight();
+                        if (m_bitmap.getWidth() * scale > w) {
+                            scale = (w - 1) / m_bitmap.getWidth();
+                        }
+                    }
                 }
+
+                canvas.drawBitmap(m_bitmap,0, 0,paint);
+
                 for (Face face : Global.all) {
                     faceLandmarks = face.faceLandmarks;
-                    radius = scale * (faceLandmarks.eyeLeftInner.x - faceLandmarks.eyeLeftOuter.x + 15)/4;
+                    radius = (faceLandmarks.eyeLeftInner.x - faceLandmarks.eyeLeftOuter.x + 15)/4;
 
                     if (Global.firstCall) {
-                        a = m_bitmap.getWidth();
-                        b = m_bitmap.getHeight();
-
-                        if (a / b >= 1){
-                            scale = (w - 100) / m_bitmap.getWidth();
-                            if (m_bitmap.getHeight() * scale > h - 300) {
-                                scale = (h - 300) / m_bitmap.getHeight();
-                            }
-                        }
-                        else {
-                            scale = (h - 300) / m_bitmap.getHeight();
-                            if (m_bitmap.getWidth() * scale > w) {
-                                scale = (w - 100) / m_bitmap.getWidth();
-                            }
-                        }
 
                         m_bitmap = getResizedBitmap(m_bitmap, (int)(scale * m_bitmap.getWidth()), (int)(scale * m_bitmap.getHeight()));
                         m_pupil = getResizedBitmap(m_pupil,(int)(scale * (faceLandmarks.eyeLeftInner.x - faceLandmarks.eyeLeftOuter.x + 15)),(int)(scale * (faceLandmarks.eyeLeftInner.x - faceLandmarks.eyeLeftOuter.x + 15)));
@@ -309,16 +312,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Global.firstCall = false;
                     }
 
-                    //canvas.drawBitmap(m_bitmap,(float)(h / 2 - scale * m_bitmap.getHeight() / 2),(float)(w / 2 - scale * m_bitmap.getWidth() / 2),paint);
-                    canvas.drawBitmap(m_bitmap,0,0,paint);
+                    canvas.drawBitmap(m_eye,(float)(scale * (faceLandmarks.eyeLeftOuter.x - 10)),(float)(scale * (faceLandmarks.eyeLeftTop.y - 10)),paint);
+                    if (Global.r >= 0) canvas.drawBitmap(m_pupil,(float)(scale *(faceLandmarks.eyeLeftOuter.x - 10 - radius * (Math.sin(Global.r * 3.14159265/ 180)))),(float)(scale *(faceLandmarks.eyeLeftTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180)))),paint);
+                    else canvas.drawBitmap(m_pupil,(float)(scale *(faceLandmarks.eyeLeftOuter.x - 10 + radius * (Math.sin(-Global.r * 3.14159265/ 180)))),(float)(scale *(faceLandmarks.eyeLeftTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180)))),paint);
 
-                    canvas.drawBitmap(m_eye,(float)(faceLandmarks.eyeLeftOuter.x - 10),(float)(faceLandmarks.eyeLeftTop.y - 10),paint);
-                    if (Global.r >= 0) canvas.drawBitmap(m_pupil,(float)(faceLandmarks.eyeLeftOuter.x - 10 - radius * (Math.sin(Global.r * 3.14159265/ 180))),(float)(faceLandmarks.eyeLeftTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180))),paint);
-                    else canvas.drawBitmap(m_pupil,(float)(faceLandmarks.eyeLeftOuter.x - 10 + radius * (Math.sin(-Global.r * 3.14159265/ 180))),(float)(faceLandmarks.eyeLeftTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180))),paint);
-
-                    canvas.drawBitmap(m_eye,(float)(faceLandmarks.eyeRightInner.x - 5),(float)(faceLandmarks.eyeRightTop.y - 10),paint);
-                    if (Global.r >= 0) canvas.drawBitmap(m_pupil,(float)(faceLandmarks.eyeRightInner.x - 5 - radius * (Math.sin(Global.r * 3.14159265/ 180))),(float)(faceLandmarks.eyeRightTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180))),paint);
-                    else canvas.drawBitmap(m_pupil,(float)(faceLandmarks.eyeRightInner.x - 5 + radius * (Math.sin(-Global.r * 3.14159265/ 180))),(float)(faceLandmarks.eyeRightTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180))),paint);
+                    canvas.drawBitmap(m_eye,(float)(scale * (faceLandmarks.eyeRightInner.x - 5)),(float)(scale * (faceLandmarks.eyeRightTop.y - 10)),paint);
+                    if (Global.r >= 0) canvas.drawBitmap(m_pupil,(float)(scale *(faceLandmarks.eyeRightInner.x - 5 - radius * (Math.sin(Global.r * 3.14159265/ 180)))),(float)(scale *(faceLandmarks.eyeRightTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180)))),paint);
+                    else canvas.drawBitmap(m_pupil,(float)(scale *(faceLandmarks.eyeRightInner.x - 5 + radius * (Math.sin(-Global.r * 3.14159265/ 180)))),(float)(scale *(faceLandmarks.eyeRightTop.y - 10 - radius * (1-Math.cos(Global.r*3.14159265/180)))),paint);
 
                 }
                 invalidate();
