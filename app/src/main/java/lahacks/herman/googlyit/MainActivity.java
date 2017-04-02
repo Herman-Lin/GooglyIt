@@ -106,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        //// Inflate the menu; this adds items to the action bar if it is present.
-       // getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
 
@@ -115,28 +113,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void onSensorChanged(SensorEvent event) {
         if (Global.all != null && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-           if (event.values[0] > 0.128) { // to right
+           if (event.values[0] > 0.132) { // to right
                Global.time = 1;
                if (Global.r > 0){
-                   Global.rv -= event.values[0] *800;
+                   Global.rv -= event.values[0] * 200;
                }
-               else Global.rv += event.values[0] *800;
-              //if (Global.d == 1 && (Global.r > 90 || Global.r < -90))
-               //    Global.rv = event.values[0] * 1000;
-               //else if (Global.r < 90 && Global.r > -90)
-                //  Global.rv = event.values[0] * -1000;
+               else Global.rv += event.values[0] * 200;
            }
-           else if (event.values[0] < -0.128) { // to left
+           else if (event.values[0] < -0.132) { // to left
                Global.time = 1;
                if (Global.r > 0){
                    Global.rv += event.values[0] * 700;
                }
                else Global.rv -= event.values[0] * 700;
-
-               //if (Global.d == -1 && (Global.r > 90 || Global.r < -90))
-                 //  Global.rv = event.values[0] * 1000;
-               //else if(Global.r < 90 && Global.r > -90)
-                 //  Global.rv = event.values[0] * -1000;
             }
         }
     }
@@ -277,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 if (Global.r >= 180) Global.r = -180;
                 else if (Global.r < -180) Global.r = 180;
-                Global.r = Math.pow(2.71828, -0.0002 * Global.time) * (Global.r + Global.rv / 60);
+                Global.r = Math.pow(2.71828, -0.005 * Global.time) * (Global.r + Global.rv / 60);
 
                 if (Global.firstCall) {
                     m_bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
